@@ -2,35 +2,22 @@ import dir from "node-dir"
 import fs from "fs"
 import { exec } from "child_process"
 
-const __dirname = import.meta.dirname;
-
-async function run() {
-
-  dir.readFiles(__dirname, {
-    excludeDir: ['node_modules'],
-    match: /.tsx?$/,
-    }, function(err, content, filename, next) {
+const run = async () => {
+  dir.readFiles(
+    import.meta.dirname,
+    { excludeDir: ['node_modules'], match: /.tsx?$/, },
+    (err, content, filename, next) => {
         if (err) throw err;
 
-        const response = fetch('http://127.0.0.1:3000/api/typescript-to-javascript', {
-          method: "POST",
-          body: content,
-        }).then((response) => {
-          response.text().then((value) => {
-
-            fs.writeFile(filename, value, err => {
-              if (err) {
-                console.error(err);
-              }
-            });
-
-          })
-        })
+        const response = fetch(
+          'http://127.0.0.1:3000/api/typescript-to-javascript',
+          { method: "POST", body: content, })
+          .then(response => response.text()
+            .then(value => fs.writeFile(filename, value, err => { if (err) console.error(err) })))
 
         next();
     },
-
-    function(err, files){
+    (err, files) => {
         if (err) throw err;
         console.log('finished reading files:');
     });
@@ -49,4 +36,5 @@ async function run() {
 
 
 }
+
 run();
